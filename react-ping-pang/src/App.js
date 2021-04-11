@@ -6,42 +6,40 @@ import GameBoard from './components/GameBoard';
 
 import useForm from './hooks/useForm';
 import useFetch from './hooks/useFetch';
+import useMouseMove from './hooks/useMouseMove';
+
 import Hello from './components/Hello';
 
 function expensiveInitialState() {
-  return 10;
+  return 20;
 }
 
 const App = () => {
-  const [count, setCount] = useState(() => expensiveInitialState());
-  const [count2, setCount2] = useState(20);
   const [values, handleChange] = useForm({
     email: '',
     password: '',
     firstName: ''
   });
-  
+
   const [showHello, setShowHello] = useState(false);
-
-  // useEffect(() => {
-  //   console.log("render");
-  //   const onMouseMove = e => {
-  //     console.log(e);
-  //   }
-  //   window.addEventListener('mousemove', onMouseMove)
-
-  //   return () => {
-  //     //  console.log('cleanup');
-  //     window.removeEventListener('mousemove', onMouseMove);
-  //   }
-  // }, []);
-
   // fetch api: numbersapi.com/43/trivia
-  const { data, loading } = useFetch("http://numbersapi.com/43/trivia");
+  const [count, setCount] = useState(JSON.parse(localStorage.getItem("count")));
+  const [count2, setCount2] = useState(() => expensiveInitialState());
+  const { data, loading } = useFetch(`http://numbersapi.com/${count}/trivia`);
+
+  useEffect(() => {
+    console.log('count: ', count);
+    localStorage.setItem("count", JSON.stringify(count));
+
+    return () => {
+      console.log('cleanup');
+    }
+  }, [count])
+
+
   return (
     <div className="App">
-             <div>{loading ? "loading..." : data}</div>
-      <div>
+      <div style={{ padding: 5 }}>
         <h3>Ping Pang Game using React</h3>
         <h4>
           <a
@@ -51,22 +49,26 @@ const App = () => {
             rel="noopener noreferrer"
           >Demo Source </a>
         </h4>
- 
 
-        <div>
+
+        <div style={{ padding: 5 }}>
           <button
             onClick={() => {
               setCount(c => c + 1);
               setCount2(c => c + 1);
             }} >
-            +
+            Increment
           </button>
-          <div>count 1: {count} </div>
-          <div>count 2: {count2} </div>
+          <div id="fetchAPI" style={{ padding: 5 }}>
+            <div>count 1: {count} </div>
+            <div>count 2: {count2} </div>
+            <div>{!data ? "loading..." : data}</div>
+            <br />
+          </div>
 
           {/* <GameBoard /> */}
         </div>
-        <div>
+        <div style={{ padding: 5 }}>
           <button onClick={() => setShowHello(!showHello)} name="toggleShowHello"> ShowHello</button>
           <br />
           {showHello && <Hello />}
